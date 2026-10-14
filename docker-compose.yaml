@@ -1,31 +1,36 @@
-version: "3.8"
-
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql
+    container_name: eshop-mysql
     environment:
-      MYSQL_ROOT_PASSWORD: stindadh
-      MYSQL_DATABASE: eshop_db_new
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MYSQL_DATABASE: ${DB_NAME:-eshop_db}
     volumes:
       - mysql-data:/var/lib/mysql
-  springboot:
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
     build: .
-    container_name: springboot-app
+    container_name: eshop-backend
     depends_on:
-      - mysql
+      mysql:
+        condition: service_healthy
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/eshop_db_new?createDatabaseIfNotExist=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: stindadh
-      SPRING_DATASOURCE_DRIVER_CLASS_NAME: com.mysql.cj.jdbc.Driver
-      SPRING_JPA_SHOW_SQL: "true"
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
-  react:
-    container_name: react-app
-    image: react-image
+      DB_URL: jdbc:mysql://mysql:3306/${DB_NAME:-eshop_db}?createDatabaseIfNotExist=true
+      DB_USERNAME: root
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+
+  frontend:
+    build: ../eshop-frontend-react
+    container_name: eshop-frontend
+    depends_on:
+      - backend
     ports:
       - "90:80"
 

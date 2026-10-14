@@ -6,6 +6,10 @@ import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
@@ -16,8 +20,24 @@ import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
-    private String jwtSecret = "dGhpcyBpcyBteSBqd3QgdG9rZW4ga2V5IGZvciBzZWN1cmluZyBteSBhcHBsaWNhdGlvbiA=";
-    private Long jwtExpirationInMs = 604800000L;
+    private static final Logger log = LoggerFactory.getLogger(JwtTokenProvider.class);
+
+    @Value("${app.jwt.secret:}")
+    private String jwtSecret;
+    @Value("${app.jwt.expiration-ms:604800000}")
+    private long jwtExpirationInMs;
+
+    private SecretKey signingKey;
+
+    @PostConstruct
+    void init() {
+        if (jwtSecret == null || jwtSecret.isBlank()) {
+            signingKey = Jwts.SIG.HS256.key().build();
+            log.warn("JWT_SECRET is not set: using a random key. Tokens become invalid on restart.");
+        } else {
+            signingKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        }
+    }
 
     // Generate token
     public String generateToken(Authentication authentication){
@@ -34,7 +54,7 @@ public class JwtTokenProvider {
     }
 
     private Key key(){
-        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+        return signingKey;
     }
 
     // get username from token

@@ -42,7 +42,6 @@ public class AuthServiceImpl implements AuthService {
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String token = jwtTokenProvider.generateToken(authentication);
-        System.out.println(token);
         return token;
     }
     @Override
@@ -63,7 +62,8 @@ public class AuthServiceImpl implements AuthService {
         user.setPassword(passwordEncoder.encode(registerDto.getPassword()));
         // assign role to user
         Set<Role> roles = new HashSet<>();
-        Role role = roleRepository.findByName(registerDto.getRole()).get();
+        Role role = roleRepository.findByName(registerDto.getRole())
+                .orElseThrow(() -> new AuthException(HttpStatus.BAD_REQUEST, "Unknown role: " + registerDto.getRole()));
         roles.add(role);
         user.setRoles(roles);
         // save user
