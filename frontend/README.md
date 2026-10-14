@@ -1,0 +1,15 @@
+# eShop Frontend
+
+Minimalist storefront. React 19, Vite, React Router.
+
+```
+npm install
+npm run dev        # http://localhost:5173
+npm run build
+```
+
+Expects the backend on `http://localhost:8080/api` (override with `VITE_API_URL`, see `.env.example`).
+
+- Public: Home, Shop, Product, Cart (stored in the browser).
+- Account: sign in / register against `/api/auth`.
+- Checkout is a placeholder until the backend has an orders API.
