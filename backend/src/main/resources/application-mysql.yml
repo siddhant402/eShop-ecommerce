@@ -1,0 +1,7 @@
+# Activate with: SPRING_PROFILES_ACTIVE=mysql
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/eshop_db?createDatabaseIfNotExist=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD}   # required, no default
+    driver-class-name: com.mysql.cj.jdbc.Driver

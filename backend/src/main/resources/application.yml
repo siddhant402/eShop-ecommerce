@@ -1,0 +1,16 @@
+# Default profile: embedded H2 file database. No installs needed.
+# For MySQL run with SPRING_PROFILES_ACTIVE=mysql (see application-mysql.yml).
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: website.rest.api
+  datasource:
+    url: jdbc:h2:file:./data/eshop;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+  jpa:
+    show-sql: ${JPA_SHOW_SQL:false}
+    hibernate:
+      ddl-auto: ${JPA_DDL_AUTO:update}
